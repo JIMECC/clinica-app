@@ -1,0 +1,36 @@
+{% extends "appbuilder/base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2><i class="fa fa-file-medical"></i> Reporte: Medicamentos más Recetados</h2>
+  <p class="text-muted">Persona 3</p>
+  <table class="table table-striped table-bordered">
+    <thead class="thead-dark">
+      <tr><th>#</th><th>Medicamento</th><th>Veces Recetado</th></tr>
+    </thead>
+    <tbody>
+      {% for row in datos %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ row.nombre }}</td>
+        <td><span class="badge badge-warning">{{ row.total }}</span></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" class="text-center">Sin datos</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <canvas id="graficaMed" height="100"></canvas>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const labels3 = [{% for row in datos %}"{{ row.nombre }}"{% if not loop.last %},{% endif %}{% endfor %}];
+  const values3 = [{% for row in datos %}{{ row.total }}{% if not loop.last %},{% endif %}{% endfor %}];
+  new Chart(document.getElementById('graficaMed'), {
+    type: 'line',
+    data: { labels: labels3, datasets: [{ label: 'Recetado', data: values3, borderColor: 'rgba(255,159,64,1)', backgroundColor: 'rgba(255,159,64,0.2)', fill: true }] },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+  });
+</script>
+{% endblock %}
+
+
