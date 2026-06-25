@@ -26,6 +26,17 @@ class MedicamentoView(ModelView):
 class PacienteView(ModelView):
     datamodel = SQLAInterface(Paciente)
     list_columns = ['nombre', 'apellido', 'genero', 'telefono', 'email']
+    label_columns = {
+        'nombre': 'Nombre',
+        'apellido': 'Apellido',
+        'genero': 'Género',
+        'telefono': 'Teléfono',
+        'email': 'Correo electrónico',
+        'fecha_nacimiento': 'Fecha de Nacimiento',
+        'direccion': 'Dirección'
+    }
+    search_columns = ['nombre', 'apellido', 'email']
+
 
 
 class CitaView(ModelView):
