@@ -38,7 +38,6 @@ class PacienteView(ModelView):
     search_columns = ['nombre', 'apellido', 'email']
 
 
-
 class CitaView(ModelView):
     datamodel = SQLAInterface(Cita)
     list_columns = ['fecha', 'paciente', 'medico', 'motivo', 'estado']
