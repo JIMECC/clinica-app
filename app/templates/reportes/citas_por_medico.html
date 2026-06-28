@@ -1,43 +1,131 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Citas por Médico</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citas por Médico — Clínica App</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/custom.css">
 </head>
 <body>
-<div class="container mt-4">
-  <h2>Reporte: Citas por Médico</h2>
-  <a href="/" class="btn btn-secondary mb-3">Volver al inicio</a>
-  <table class="table table-striped table-bordered">
-    <thead class="thead-dark">
-      <tr><th>#</th><th>Médico</th><th>Total Citas</th></tr>
-    </thead>
-    <tbody>
-      {% for row in datos %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ row.nombre }} {{ row.apellido }}</td>
-        <td>{{ row.total }}</td>
-      </tr>
-      {% else %}
-      <tr><td colspan="3" class="text-center">Sin datos</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <canvas id="g1" height="100"></canvas>
+<div class="container mt-4 pb-5">
+
+  <div class="reporte-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <p class="mb-1" style="color:rgba(255,255,255,0.65);font-size:0.8rem;letter-spacing:1.5px;text-transform:uppercase;">Módulo de Reportes</p>
+        <h2><i class="fas fa-user-md mr-3"></i>Citas por Médico</h2>
+        <div class="gold-line"></div>
+        <p>Distribución de citas médicas y análisis de carga de trabajo por profesional</p>
+      </div>
+      <a href="/" class="btn btn-secondary px-4 py-2" style="border:1px solid rgba(212,168,67,0.4)!important;">
+        <i class="fas fa-arrow-left mr-2"></i>Inicio
+      </a>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header d-flex align-items-center">
+      <i class="fas fa-table mr-2" style="color:#d4a843;"></i>
+      <span>Detalle de citas por médico</span>
+      <span class="ml-auto badge" style="background:rgba(212,168,67,0.2);color:#d4a843;padding:6px 12px;border-radius:20px;font-size:0.8rem;">
+        {{ datos|length }} médico(s)
+      </span>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-striped table-bordered mb-0">
+        <thead class="thead-dark">
+          <tr>
+            <th style="width:60px;">#</th>
+            <th><i class="fas fa-stethoscope mr-1"></i> Médico</th>
+            <th class="text-center"><i class="fas fa-calendar-check mr-1"></i> Total Citas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in datos %}
+          <tr>
+            <td><span class="badge-stat">{{ loop.index }}</span></td>
+            <td><strong>{{ row.nombre }} {{ row.apellido }}</strong></td>
+            <td class="text-center"><span class="badge-stat">{{ row.total }}</span></td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="3" class="text-center py-4" style="color:#9b2dca;">
+              <i class="fas fa-inbox fa-2x mb-2 d-block"></i>Sin datos registrados
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">
+      <i class="fas fa-chart-bar mr-2" style="color:#d4a843;"></i>
+      Gráfico de distribución de citas
+    </div>
+    <div class="card-body">
+      <canvas id="g1" height="80"></canvas>
+    </div>
+  </div>
+
+  <div class="claude-analysis-card card">
+    <div class="card-header">
+      <h5>
+        <span style="margin-right:10px;font-size:1.3rem;">🤖</span>
+        Análisis Inteligente — Claude AI
+        <span class="ml-2" style="font-size:0.75rem;color:rgba(240,204,122,0.7);font-family:'Inter',sans-serif;font-weight:400;">Powered by Anthropic</span>
+      </h5>
+    </div>
+    <div class="card-body">
+      <pre>{{ analisis }}</pre>
+    </div>
+  </div>
+
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+  const labels = [{% for r in datos %}"{{ r.nombre }} {{ r.apellido }}"{% if not loop.last %},{% endif %}{% endfor %}];
+  const values = [{% for r in datos %}{{ r.total }}{% if not loop.last %},{% endif %}{% endfor %}];
+  const colors = ['#7c00cc','#9b2dca','#b84de0','#5a0099','#d08af5'];
+
   new Chart(document.getElementById('g1'), {
     type: 'bar',
     data: {
-      labels: [{% for r in datos %}"{{ r.nombre }}"{% if not loop.last %},{% endif %}{% endfor %}],
-      datasets: [{ label: 'Citas', data: [{% for r in datos %}{{ r.total }}{% if not loop.last %},{% endif %}{% endfor %}], backgroundColor: 'rgba(54,162,235,0.7)' }]
+      labels: labels,
+      datasets: [{
+        label: 'Total de Citas',
+        data: values,
+        backgroundColor: labels.map((_, i) => colors[i % colors.length]),
+        borderWidth: 0,
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
     },
-    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#2d0057',
+          titleColor: '#d4a843',
+          bodyColor: '#fff',
+          borderColor: 'rgba(212,168,67,0.3)',
+          borderWidth: 1,
+          padding: 12,
+          cornerRadius: 8,
+        }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1, color: '#4b5563' }, grid: { color: 'rgba(155,45,202,0.08)' } },
+        x: { ticks: { color: '#4b5563', font: { weight: '600' } }, grid: { display: false } }
+      }
+    }
   });
 </script>
 </body>
 </html>
-
