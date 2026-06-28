@@ -6,6 +6,11 @@ from flask import render_template
 from sqlalchemy import func
 from . import appbuilder, db
 from .models import Especialidad, Medico, Paciente, Medicamento, Cita, Diagnostico
+from .api.claude_api import (
+    analizar_citas_por_medico,
+    analizar_pacientes_por_genero,
+    analizar_medicamentos_frecuentes
+)
 
 
 class EspecialidadView(ModelView):
@@ -65,7 +70,15 @@ class ReporteP1View(BaseView):
             .group_by(Medico.id)
             .all()
         )
-        return render_template('reportes/citas_por_medico.html', datos=datos)
+        medicos = [f"{r.nombre} {r.apellido}" for r in datos]
+        totales = [r.total for r in datos]
+        analisis = analizar_citas_por_medico(medicos, totales)
+
+        return render_template(
+            'reportes/citas_por_medico.html',
+            datos=datos,
+            analisis=analisis
+        )
 
 
 class ReporteP2View(BaseView):
@@ -83,7 +96,15 @@ class ReporteP2View(BaseView):
             .group_by(Paciente.genero)
             .all()
         )
-        return render_template('reportes/pacientes_por_genero.html', datos=datos)
+        generos = [r.genero for r in datos]
+        totales = [r.total for r in datos]
+        analisis = analizar_pacientes_por_genero(generos, totales)
+
+        return render_template(
+            'reportes/pacientes_por_genero.html',
+            datos=datos,
+            analisis=analisis
+        )
 
 
 class ReporteP3View(BaseView):
@@ -104,7 +125,15 @@ class ReporteP3View(BaseView):
             .limit(10)
             .all()
         )
-        return render_template('reportes/diagnosticos_frecuentes.html', datos=datos)
+        medicamentos = [r.nombre for r in datos]
+        totales = [r.total for r in datos]
+        analisis = analizar_medicamentos_frecuentes(medicamentos, totales)
+
+        return render_template(
+            'reportes/diagnosticos_frecuentes.html',
+            datos=datos,
+            analisis=analisis
+        )
 
 
 # Registro en menú
