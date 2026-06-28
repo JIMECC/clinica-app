@@ -1,6 +1,10 @@
 import anthropic
+import os
+from dotenv import load_dotenv
 
-client = anthropic.Anthropic(api_key="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")
+load_dotenv()
+
+client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 
 def analizar_citas_por_medico(medicos, totales):
